@@ -10,17 +10,20 @@ class SIAMESE(object):
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
 
+
             with tf.variable_scope("conv2") as scope:
                 net = tf.contrib.layers.conv2d(net, 64, [5, 5], activation_fn=tf.nn.relu, padding='SAME',
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
 
+
             with tf.variable_scope("conv3") as scope:
                 net = tf.contrib.layers.conv2d(net, 128, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
+
 
             with tf.variable_scope("conv4") as scope:
                 net = tf.contrib.layers.conv2d(net, 256, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
@@ -32,6 +35,7 @@ class SIAMESE(object):
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
+
                 output_0 = tf.contrib.layers.flatten(net)
 
             with tf.variable_scope("conv6") as scope:
@@ -39,11 +43,13 @@ class SIAMESE(object):
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
 
+
             with tf.variable_scope("conv7") as scope:
                 net = tf.contrib.layers.conv2d(net, 512, [3, 3], activation_fn=tf.nn.relu, padding='SAME',
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
+
                 output_1 = tf.contrib.layers.flatten(net)
 
             with tf.variable_scope("conv8") as scope:
@@ -51,6 +57,7 @@ class SIAMESE(object):
                                                weights_initializer=tf.contrib.layers.xavier_initializer_conv2d(),
                                                scope=scope, reuse=reuse)
                 net = tf.contrib.layers.max_pool2d(net, [2, 2], padding='SAME')
+
 
             output_2 = tf.contrib.layers.flatten(net)
 
@@ -77,7 +84,7 @@ class SIAMESE(object):
 
         # CalculateMean loss
         with tf.name_scope("loss"):
-            losses = -(y * tf.log(y_) + (1 - y) * tf.log(1 - y_))
+            losses = -(y * tf.log(tf.clip_by_value(y_,1e-8,tf.reduce_max(y_))) + (1 - y) * tf.log(tf.clip_by_value(1 - y_,1e-8,tf.reduce_max(1 - y_))))
             loss = tf.reduce_mean(losses)
 
         return model1, model2, y_, loss
